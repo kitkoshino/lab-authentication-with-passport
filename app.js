@@ -3,12 +3,12 @@
 const { join } = require('path');
 const express = require('express');
 const createError = require('http-errors');
+const connectMongo = require('connect-mongo');
+const expressSession = require('express-session');
+const mongoose = require('mongoose');
 const logger = require('morgan');
 const sassMiddleware = require('node-sass-middleware');
 const serveFavicon = require('serve-favicon');
-const expressSession = require('express-session');
-const mongoose = require('mongoose');
-const connectMongo = require('connect-mongo');
 
 const indexRouter = require('./routes/index');
 const authenticationRouter = require('./routes/authentication');
