@@ -9,6 +9,7 @@ const mongoose = require('mongoose');
 const logger = require('morgan');
 const sassMiddleware = require('node-sass-middleware');
 const serveFavicon = require('serve-favicon');
+const bindUserToViewLocals = require('./middleware/bind-user-to-view-locals.js');
 
 const indexRouter = require('./routes/index');
 const authenticationRouter = require('./routes/authentication');
@@ -58,6 +59,8 @@ require('./configure-passport');
 
 app.use(passport.initialize());
 app.use(passport.session());
+
+app.use(bindUserToViewLocals);
 
 app.use('/', indexRouter);
 app.use('/authentication', authenticationRouter);

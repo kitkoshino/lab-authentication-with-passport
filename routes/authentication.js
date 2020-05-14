@@ -7,6 +7,22 @@ const passport = require('passport');
 
 const routeGuard = require('./../middleware/route-guard');
 
+authenticationRouter.get(
+  '/github',
+  passport.authenticate('github', {
+    successRedirect: '/',
+    failureRedirect: '/error'
+  })
+);
+
+authenticationRouter.get(
+  '/github-callback',
+  passport.authenticate('github', {
+    successRedirect: '/',
+    failureRedirect: '/error'
+  })
+);
+
 authenticationRouter.get('/sign-up', (req, res, next) => {
   console.log('rota get sign up');
   res.render('authentication/sign-up');
@@ -35,8 +51,12 @@ authenticationRouter.post(
 authenticationRouter.get('/private', routeGuard, (req, res, next) => {
   const userData = req.user;
   console.log('rota private', userData);
-  res.render('authentication/private', {userData});
+  res.render('authentication/private', { userData });
 });
 
+authenticationRouter.post('/sign-out', (req, res, next) => {
+  req.logout();
+  res.redirect('/');
+});
 
 module.exports = authenticationRouter;
