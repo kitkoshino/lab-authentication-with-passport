@@ -6,9 +6,14 @@ const createError = require('http-errors');
 const logger = require('morgan');
 const sassMiddleware = require('node-sass-middleware');
 const serveFavicon = require('serve-favicon');
+const expressSession = require('express-session');
+const mongoose = require('mongoose');
+const connectMongo = require('connect-mongo');
 
 const indexRouter = require('./routes/index');
 const authenticationRouter = require('./routes/authentication');
+
+const passport = require('passport');
 
 const app = express();
 
@@ -18,6 +23,7 @@ app.set('view engine', 'hbs');
 
 app.use(logger('dev'));
 app.use(express.urlencoded({ extended: true }));
+app.use(serveFavicon(join(__dirname, 'public/images', 'favicon.ico')));
 app.use(
   sassMiddleware({
     src: join(__dirname, 'public'),
@@ -27,11 +33,35 @@ app.use(
     sourceMap: false
   })
 );
-app.use(serveFavicon(join(__dirname, 'public/images', 'favicon.ico')));
 app.use(express.static(join(__dirname, 'public')));
+app.use(logger('dev'));
+app.use(
+  expressSession({
+    secret: process.env.SESSION_SECRET,
+    resave: true,
+    saveUninitialized: false,
+    cookie: {
+      maxAge: 60 * 60 * 24 * 15,
+      sameSite: 'lax',
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production'
+    },
+    store: new (connectMongo(expressSession))({
+      mongooseConnection: mongoose.connection,
+      ttl: 60 * 60 * 24
+    })
+  })
+);
+
+require('./configure-passport');
+
+
+app.use(passport.initialize());
+app.use(passport.session());
 
 app.use('/', indexRouter);
 app.use('/authentication', authenticationRouter);
+
 
 // Catch missing routes and forward to error handler
 app.use((req, res, next) => {
